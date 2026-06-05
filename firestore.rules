@@ -1,0 +1,152 @@
+rules_version = '2';
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  Intelligent Glove for Arabic Sign Language — Firestore Security Rules
+//
+//  Core principle: a signed-in user may only read and write data that
+//  belongs to them. Every business collection carries an owner field
+//  (`userId` or `ownerId`) that is matched against request.auth.uid.
+//
+//  Protected fields (uid, createdAt, role, ownerId, …) can never be changed
+//  by the client once a document is created. Audit collections
+//  (connectionLogs, gestureReadings) are append-only from the client.
+//
+//  Cloud Functions use the Admin SDK and BYPASS these rules, so server-side
+//  alert generation / analytics aggregation is unaffected.
+// ═══════════════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isUser(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Owns the document being read/updated/deleted (existing data).
+    function ownsResource(field) {
+      return isSignedIn() && resource.data[field] == request.auth.uid;
+    }
+
+    // Owns the document being created (incoming data).
+    function ownsIncoming(field) {
+      return isSignedIn() && request.resource.data[field] == request.auth.uid;
+    }
+
+    // True when `field` is NOT being modified by this update.
+    function unchanged(field) {
+      return !(field in request.resource.data)
+          || request.resource.data[field] == resource.data[field];
+    }
+
+    // True when the update changes ONLY the fields listed in `allowed`.
+    function onlyChanges(allowed) {
+      return request.resource.data.diff(resource.data)
+                 .affectedKeys().hasOnly(allowed);
+    }
+
+    // ── users/{userId} ───────────────────────────────────────────────────
+    // A profile is private to its owner. Identity & role fields are locked.
+    match /users/{userId} {
+      allow read:   if isUser(userId);
+
+      allow create: if isUser(userId)
+                    && request.resource.data.uid == userId
+                    && request.resource.data.role == 'user';   // no self-promotion
+
+      allow update: if isUser(userId)
+                    && unchanged('uid')
+                    && unchanged('createdAt')
+                    && unchanged('role')               // role only via Admin SDK
+                    && unchanged('authProvider');
+
+      allow delete: if isUser(userId);
+    }
+
+    // ── usernames/{username} ─────────────────────────────────────────────
+    // Reservation index for fast, unique username checking.
+    //   * get    → public, so the SIGN-UP screen can check availability
+    //              before an account exists. (Only single-doc reads.)
+    //   * list   → blocked, so the whole index cannot be scraped.
+    //   * create → only the owner may claim a free username.
+    //   * delete → only the owner may release it.
+    match /usernames/{username} {
+      allow get:    if true;
+      allow list:   if false;
+      allow create: if ownsIncoming('uid')
+                    && !exists(/databases/$(database)/documents/usernames/$(username));
+      allow update: if false;
+      allow delete: if ownsResource('uid');
+    }
+
+    // ── devices/{deviceId} ───────────────────────────────────────────────
+    // One owner per glove. Identity fields are immutable after creation.
+    match /devices/{deviceId} {
+      allow read:   if ownsResource('ownerId');
+      allow create: if ownsIncoming('ownerId');
+      allow update: if ownsResource('ownerId')
+                    && unchanged('ownerId')
+                    && unchanged('deviceId')
+                    && unchanged('createdAt');
+      allow delete: if ownsResource('ownerId');
+    }
+
+    // ── connectionLogs/{logId} ───────────────────────────────────────────
+    // Append-only audit trail. Clients may add and read; never edit/delete.
+    match /connectionLogs/{logId} {
+      allow read:   if ownsResource('userId');
+      allow create: if ownsIncoming('userId');
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ── gestureReadings/{readingId} ──────────────────────────────────────
+    // Raw sensor evidence. Append-only and immutable.
+    match /gestureReadings/{readingId} {
+      allow read:   if ownsResource('userId');
+      allow create: if ownsIncoming('userId');
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ── translationSessions/{sessionId} ──────────────────────────────────
+    // Owner may create, end (update), and remove their own sessions.
+    match /translationSessions/{sessionId} {
+      allow read:   if ownsResource('userId');
+      allow create: if ownsIncoming('userId');
+      allow update: if ownsResource('userId')
+                    && unchanged('userId')
+                    && unchanged('sessionId')
+                    && unchanged('createdAt');
+      allow delete: if ownsResource('userId');
+    }
+
+    // ── realtimeMessages/{messageId} ─────────────────────────────────────
+    // Translated text stream. Create + read by owner; immutable afterwards.
+    match /realtimeMessages/{messageId} {
+      allow read:   if ownsResource('userId');
+      allow create: if ownsIncoming('userId');
+      allow update: if false;
+      allow delete: if ownsResource('userId');
+    }
+
+    // ── alerts/{alertId} ─────────────────────────────────────────────────
+    // Owner reads everything; may only flip the `isRead` flag.
+    match /alerts/{alertId} {
+      allow read:   if ownsResource('userId');
+      allow create: if ownsIncoming('userId');
+      allow update: if ownsResource('userId')
+                    && onlyChanges(['isRead']);
+      allow delete: if ownsResource('userId');
+    }
+
+    // ── default deny ─────────────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

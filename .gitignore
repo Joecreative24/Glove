@@ -1,0 +1,31 @@
+# ─── Flutter / Dart ───────────────────────────────────────────────
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+*.iml
+.idea/
+.vscode/
+
+# ─── Firebase secrets (NEVER commit these) ────────────────────────
+# Generated per-platform config — created by `flutterfire configure`.
+google-services.json
+GoogleService-Info.plist
+# Service-account keys for the Admin SDK / CI
+*serviceAccount*.json
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+ui-debug.log
+firestore-debug.log
+
+# ─── Cloud Functions ──────────────────────────────────────────────
+functions/node_modules/
+functions/.env
+functions/npm-debug.log
+
+# ─── OS ───────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
