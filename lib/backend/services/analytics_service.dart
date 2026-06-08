@@ -32,10 +32,6 @@ class UserAnalytics {
 }
 
 class AnalyticsService {
-  final FirebaseFirestore _db;
-  AnalyticsService({FirebaseFirestore? db})
-      : _db = db ?? FirebaseFirestore.instance;
-
   // ── Counts ─────────────────────────────────────────────────────────────
 
   /// Number of sessions per user (server-side aggregate count).

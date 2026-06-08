@@ -13,18 +13,21 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// How the account was created.
-enum AuthProvider {
+///
+/// Named `AuthProviderType` (not `AuthProvider`) so it never clashes with
+/// `firebase_auth`'s own `AuthProvider` class when both are imported.
+enum AuthProviderType {
   emailPassword, // 'email/password'
   google; // 'google'
 
   String get wire => switch (this) {
-        AuthProvider.emailPassword => 'email/password',
-        AuthProvider.google => 'google',
+        AuthProviderType.emailPassword => 'email/password',
+        AuthProviderType.google => 'google',
       };
 
-  static AuthProvider fromWire(String? v) => switch (v) {
-        'google' => AuthProvider.google,
-        _ => AuthProvider.emailPassword,
+  static AuthProviderType fromWire(String? v) => switch (v) {
+        'google' => AuthProviderType.google,
+        _ => AuthProviderType.emailPassword,
       };
 }
 

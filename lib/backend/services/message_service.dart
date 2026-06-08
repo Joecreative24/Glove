@@ -5,18 +5,12 @@
 // TranslationSession outputs its recognised text here (messageType
 // 'translation'); alerts/system notices can share the same feed.
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../core/enums.dart';
 import '../core/firebase_refs.dart';
 import '../core/firestore_utils.dart';
 import '../models/realtime_message.dart';
 
 class MessageService {
-  final FirebaseFirestore _db;
-  MessageService({FirebaseFirestore? db})
-      : _db = db ?? FirebaseFirestore.instance;
-
   /// Pushes one translated message into the live feed. Returns its id.
   Future<String> createMessage({
     required String userId,

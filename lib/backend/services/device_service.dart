@@ -3,18 +3,12 @@
 // state machine. The Devices tab and the Home "current glove" card read
 // from here.
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../core/enums.dart';
 import '../core/firebase_refs.dart';
 import '../core/firestore_utils.dart';
 import '../models/glove_device.dart';
 
 class DeviceService {
-  final FirebaseFirestore _db;
-  DeviceService({FirebaseFirestore? db})
-      : _db = db ?? FirebaseFirestore.instance;
-
   // ── Reads ──────────────────────────────────────────────────────────────
 
   /// All gloves owned by [uid], newest first. Powers the Devices list.

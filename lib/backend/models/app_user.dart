@@ -18,7 +18,7 @@ class AppUser {
   final String? photoUrl;
   final DateTime? createdAt;
   final DateTime? lastLoginAt;
-  final AuthProvider authProvider;
+  final AuthProviderType authProvider;
   final UserRole role;
   final int totalDevices;
   final int totalSessions;
@@ -34,7 +34,7 @@ class AppUser {
     this.photoUrl,
     this.createdAt,
     this.lastLoginAt,
-    this.authProvider = AuthProvider.emailPassword,
+    this.authProvider = AuthProviderType.emailPassword,
     this.role = UserRole.user,
     this.totalDevices = 0,
     this.totalSessions = 0,
@@ -51,7 +51,7 @@ class AppUser {
         photoUrl: m['photoUrl'] as String?,
         createdAt: readDate(m['createdAt']),
         lastLoginAt: readDate(m['lastLoginAt']),
-        authProvider: AuthProvider.fromWire(m['authProvider'] as String?),
+        authProvider: AuthProviderType.fromWire(m['authProvider'] as String?),
         role: UserRole.fromWire(m['role'] as String?),
         totalDevices: readInt(m['totalDevices']),
         totalSessions: readInt(m['totalSessions']),

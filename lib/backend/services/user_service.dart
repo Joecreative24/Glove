@@ -9,10 +9,6 @@ import '../core/firestore_utils.dart';
 import '../models/app_user.dart';
 
 class UserService {
-  final FirebaseFirestore _db;
-  UserService({FirebaseFirestore? db})
-      : _db = db ?? FirebaseFirestore.instance;
-
   // ── Reads ──────────────────────────────────────────────────────────────
 
   Future<AppUser?> getUser(String uid) async {
@@ -37,7 +33,7 @@ class UserService {
     required String fullName,
     required String email,
     required String uniqueUsername,
-    required AuthProvider authProvider,
+    required AuthProviderType authProvider,
     String? photoUrl,
     String? phoneNumber,
   }) =>

@@ -5,8 +5,6 @@
 // of the TranslationSession it belongs to. SessionService reads them back to
 // compute totals when a session ends. (GestureReading feeds TranslationSession.)
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../core/enums.dart';
 import '../core/firebase_refs.dart';
 import '../core/firestore_utils.dart';
@@ -29,10 +27,6 @@ class GestureStats {
 }
 
 class GestureService {
-  final FirebaseFirestore _db;
-  GestureService({FirebaseFirestore? db})
-      : _db = db ?? FirebaseFirestore.instance;
-
   /// Stores one recognised gesture. Returns the new reading id.
   Future<String> addReading({
     required String userId,

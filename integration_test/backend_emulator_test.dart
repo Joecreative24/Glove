@@ -63,7 +63,7 @@ void main() {
     final u = await register('sara_ali');
     expect(u.uniqueUsername, 'sara_ali');
     expect(u.fullName, 'SARA_ALI');
-    expect(u.authProvider, AuthProvider.emailPassword);
+    expect(u.authProvider, AuthProviderType.emailPassword);
     expect(await backend.isUsernameAvailable('sara_ali'), isFalse);
 
     // A different account cannot claim the same username.

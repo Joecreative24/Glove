@@ -117,7 +117,7 @@ class GloveBackend {
             fullName: fullName,
             email: email,
             uniqueUsername: username,
-            authProvider: AuthProvider.emailPassword,
+            authProvider: AuthProviderType.emailPassword,
             photoUrl: user.photoURL,
           ),
         );
@@ -142,7 +142,7 @@ class GloveBackend {
     await users.touchLastLogin(uid);
     return (await users.getUser(uid)) ??
         // Defensive: profile missing (e.g. created out-of-band) → build one.
-        await _ensureProfile(cred.user!, AuthProvider.emailPassword);
+        await _ensureProfile(cred.user!, AuthProviderType.emailPassword);
   }
 
   /// GOOGLE LOGIN FLOW.
@@ -159,7 +159,7 @@ class GloveBackend {
       await users.touchLastLogin(user.uid);
       return existing;
     }
-    return _ensureProfile(user, AuthProvider.google);
+    return _ensureProfile(user, AuthProviderType.google);
   }
 
   /// FORGOT-PASSWORD FLOW. Sends the reset email.
@@ -174,7 +174,7 @@ class GloveBackend {
 
   /// Creates a profile for an auth user that doesn't have one yet (Google
   /// first sign-in, or recovery). Generates a unique username from the email.
-  Future<AppUser> _ensureProfile(User user, AuthProvider provider) async {
+  Future<AppUser> _ensureProfile(User user, AuthProviderType provider) async {
     final seed = (user.email ?? 'user').split('@').first;
     final username = await _uniqueUsernameFrom(seed);
 

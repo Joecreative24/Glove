@@ -3,18 +3,12 @@
 // Every connect / disconnect / lost / restored event is recorded here so
 // the app can show a timeline and analytics can measure reliability.
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import '../core/enums.dart';
 import '../core/firebase_refs.dart';
 import '../core/firestore_utils.dart';
 import '../models/connection_log.dart';
 
 class ConnectionLogService {
-  final FirebaseFirestore _db;
-  ConnectionLogService({FirebaseFirestore? db})
-      : _db = db ?? FirebaseFirestore.instance;
-
   /// Records one connection event. Returns the new log id.
   Future<String> log({
     required String userId,
