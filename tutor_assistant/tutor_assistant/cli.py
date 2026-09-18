@@ -130,6 +130,9 @@ class Cli:
         elif a.student_cmd == "resolve":
             self.db.resolve_weak_spot(a.weak_spot_id)
             print("Marked resolved.")
+        elif a.student_cmd == "fulfil":
+            self.db.fulfil_promise(a.promise_id)
+            print("Promise marked as sent.")
 
     # -- log ----------------------------------------------------------------
 
@@ -331,6 +334,7 @@ def build_parser() -> argparse.ArgumentParser:
     ssub.add_parser("list")
     ssub.add_parser("show").add_argument("name")
     ssub.add_parser("resolve", help="mark a weak spot as resolved").add_argument("weak_spot_id", type=int)
+    ssub.add_parser("fulfil", help="mark a promised resource as sent").add_argument("promise_id", type=int)
 
     lg = sub.add_parser("log", help="dump your post-session bullets; get drafts queued")
     lg.add_argument("notes", nargs="*", help="the notes (or '-' to read stdin)")

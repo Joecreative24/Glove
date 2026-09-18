@@ -7,6 +7,7 @@ create an OAuth desktop client in Google Cloud Console, and point GOOGLE_CLIENT_
 from __future__ import annotations
 
 import base64
+import hashlib
 from datetime import datetime
 from email.message import EmailMessage
 from pathlib import Path
@@ -74,13 +75,18 @@ def create_gmail_draft(service, *, to: str, subject: str, body: str) -> str:
     return draft["id"]
 
 
+def calendar_event_id(slot: Slot) -> str:
+    """Stable id per slot in Google's base32hex alphabet (a-v, 0-9); hex digits are a subset."""
+    key = slot.uid or f"slot-{slot.id}"
+    return "tutor" + hashlib.sha1(key.encode("utf-8")).hexdigest()
+
+
 def push_slots_to_calendar(service, slots: list[Slot], *, tz: str, calendar_id: str = "primary",
                            prep_minutes: int = 30, descriptions: dict[int, str] | None = None) -> list[str]:
     """Insert or update one Google Calendar event per slot (idempotent via a stable event id)."""
     ids: list[str] = []
     for slot in slots:
-        event_id = "tutor" + (slot.uid or f"slot{slot.id}").lower().replace("@", "").replace("-", "")
-        event_id = "".join(ch for ch in event_id if ch in "abcdefghijklmnopqrstuv0123456789")[:1024] or f"tutorslot{slot.id}"
+        event_id = calendar_event_id(slot)
         body = {
             "id": event_id,
             "summary": slot.title,
@@ -100,5 +106,5 @@ def push_slots_to_calendar(service, slots: list[Slot], *, tz: str, calendar_id: 
     return ids
 
 
-__all__ = ["drive_service", "gmail_service", "calendar_service", "create_gmail_draft",
+__all__ = ["calendar_event_id", "drive_service", "gmail_service", "calendar_service", "create_gmail_draft",
            "push_slots_to_calendar", "datetime"]

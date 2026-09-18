@@ -69,7 +69,8 @@ prints topics covered with counts, weak spots ranked by how often they recur, op
 five session summaries. Everything Claude drafts is built from this history, so a message in March can
 say "since/for has finally clicked" because the database knows it was flagged four times in January.
 
-Mark a weak spot fixed with `tutor student resolve <weak_spot_id>`.
+Mark a weak spot fixed with `tutor student resolve <weak_spot_id>`, and close a promise you fulfilled by hand
+(e.g. handed over in the lesson) with `tutor student fulfil <promise_id>`.
 
 ## Materials
 

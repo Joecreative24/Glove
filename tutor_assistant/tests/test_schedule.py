@@ -64,3 +64,14 @@ def test_brief(db):
     assert "since vs for (x1)" in text
     assert write_brief(db, FakeLLM(), date(2026, 9, 19)) == text
     assert brief_input(db, date(2026, 9, 25)).startswith("No lessons")
+
+
+def test_calendar_event_ids_are_stable_and_distinct(db):
+    from tutor_assistant.google_services import calendar_event_id
+
+    a = db.upsert_slot(title="A", starts_at=datetime(2026, 9, 19, 16), ends_at=datetime(2026, 9, 19, 17), uid="wxyz@x")
+    b = db.upsert_slot(title="B", starts_at=datetime(2026, 9, 19, 17), ends_at=datetime(2026, 9, 19, 18), uid="wxyz@y")
+    ids = {calendar_event_id(a), calendar_event_id(b)}
+    assert len(ids) == 2
+    assert all(set(i) <= set("abcdefghijklmnopqrstuv0123456789") and 5 <= len(i) <= 1024 for i in ids)
+    assert calendar_event_id(a) == calendar_event_id(db.upsert_slot(title="A2", starts_at=a.starts_at, ends_at=a.ends_at, uid="wxyz@x"))

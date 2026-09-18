@@ -23,6 +23,12 @@ def test_cli_end_to_end(capsys, tmp_path, materials_dir):
     assert (tmp_path / "out.txt").read_text().count("Tense worksheet") == 1
     out = run(capsys, tmp_path, "student", "show", "dapo")
     assert "past perfect" in out and "Weak spots" in out
+    run(capsys, tmp_path, "log", "Dapo — commas, send comma sheet", "--no-materials")
+    out = run(capsys, tmp_path, "student", "show", "dapo")
+    assert "Still to send" in out and "send comma sheet" in out
+    promise_id = out.split("Still to send:")[1].split("[")[1].split("]")[0]
+    run(capsys, tmp_path, "student", "fulfil", promise_id)
+    assert "Still to send" not in run(capsys, tmp_path, "student", "show", "dapo")
     run(capsys, tmp_path, "schedule", "add", "Dapo", "2099-01-01T16:00")
     out = run(capsys, tmp_path, "brief", "--date", "2099-01-01", "--raw")
     assert "Lesson: Dapo" in out
