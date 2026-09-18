@@ -95,3 +95,11 @@ await backend.registerWithEmail(
 | `signInWithGoogle` | `setConnectionStatus` | `endTranslation` |
 | `sendPasswordReset` | `reportBattery` | `triggerSos` |
 | `isUsernameAvailable` | `sessionHistory` | analytics via `AnalyticsService` |
+
+---
+
+## Also in this repo: `tutor_assistant/`
+
+A separate, self-contained Python CLI for private tutors (post-session feedback drafts, materials
+dispatch, student memory in SQLite, schedule mirroring and a nightly brief, powered by the Claude API).
+See [`tutor_assistant/README.md`](tutor_assistant/README.md).
